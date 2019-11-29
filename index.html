@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset='utf-8'>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+    <meta name="description" content="Find out what your public IPv4 address is revealing about you! My IP address information shows your location; city, region, country, ISP and location on a map."/>
+    <meta name="keywords" content="IP,IPAddress,IP Address,ENV,port,confirm,free,Global IPAddress,IP Search,City,Location,Region,Countiry,ISP,My IP Address, find my address,find my ip address">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/kognise/water.css@latest/dist/dark.min.css">
+    <style>
+      td { white-space: pre; }
+    </style>
+    <title>What's My IP Address</title>
+  </head>
+  <body>
+    <div id='container'>
+      <h1>What's My IP Address</h1>
+      <h2>IP Address</h2>
+      <table>
+        <tr>
+          <td>IP</td>
+          <td v-text='ipinfo.ip'></td>
+        </tr>
+        <tr>
+          <td>Hostname</td>
+          <td v-text='ipinfo.hostname'></td>
+        </tr>
+        <tr>
+          <td>Organization</td>
+          <td v-text='ipinfo.org'></td>
+        </tr>
+        <tr>
+          <td>TimeZone</td>
+          <td v-text='ipinfo.timezone'></td>
+        </tr>
+        <tr>
+          <td>Country</td>
+          <td v-text='ipinfo.country'></td>
+        </tr>
+        <tr>
+          <td>Region</td>
+          <td v-text='ipinfo.region'></td>
+        </tr>
+        <tr>
+          <td>City</td>
+          <td v-text='ipinfo.city'></td>
+        </tr>
+        <tr>
+          <td>ZIP Code</td>
+          <td v-text='ipinfo.postal'></td>
+        </tr>
+        <tr>
+          <td>Location</td>
+          <td v-text='ipinfo.loc'></td>
+        </tr>
+      </table>
+
+      <h2>Platform</h2>
+      <table>
+        <tr>
+          <td>Time</td>
+          <td v-text='platform.time'></td>
+        </tr>
+        <tr>
+          <td>Language</td>
+          <td v-text='platform.language'></td>
+        </tr>
+        <tr>
+          <td>Browser</td>
+          <td v-text='platform.browser'></td>
+        </tr>
+        <tr>
+          <td>OS</td>
+          <td v-text='platform.os'></td>
+        </tr>
+        <tr>
+          <td>Device</td>
+          <td v-text='platform.device'></td>
+        </tr>
+        <tr>
+          <td>Window Size</td>
+          <td v-text='platform.windowSize'></td>
+        </tr>
+        <tr>
+          <td>Screen Size</td>
+          <td v-text='platform.screenSize'></td>
+        </tr>
+        <tr>
+          <td>UserAgent</td>
+          <td v-text='platform.ua'></td>
+        </tr>
+        <tr>
+          <td>Cookie</td>
+          <td v-text='platform.cookie'></td>
+        </tr>
+        <tr>
+          <td>Referer</td>
+          <td v-text='platform.referrer'></td>
+        </tr>
+      </table>
+      <iframe :src="getGoogleMap()" width="600" height="480" frameborder="0" style="border:0;"></iframe>
+    </div>
+
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+    <script src="https://unpkg.com/vue"></script>
+    <script type='text/javascript'>
+      const vue = new Vue({
+        el: '#container',
+        data() {
+          return {
+            ipinfo_token: '7b9f9fe600b38e',
+            ipinfo: {},
+            platform: {}
+          }
+        },
+        methods: {
+          getIpInfo()  {
+            axios.get('https://ipinfo.io', {params: {token: this.ipinfo_token}}).then((res) => {
+              this.ipinfo = res.data
+            })
+          },
+          getGoogleMap() {
+            return `https://maps.google.co.jp/maps?output=embed&q=${this.ipinfo.loc}`
+          },
+          getPlatformInfo() {
+            const parser = new UAParser().getResult()
+            const platform = {
+              time: new Date().toLocaleString(),
+              referrer: document.referrer,
+              cookie:document.cookie.replace(/;/g, "\n"),
+              windowSize: `${window.innerWidth} x ${window.innerHeight}`,
+              screenSize: `${screen.width} x ${screen.height}`,
+              os: `${parser.os.name} ${parser.os.version}`,
+              ua: parser.ua,
+              browser: `${parser.browser.name} ${parser.browser.version}`,
+              device: `${parser.device.vendor||''} ${parser.device.model||''}`
+            };
+            platform.language = (window.navigator.languages && window.navigator.languages[0]) ||
+              window.navigator.language ||
+              window.navigator.userLanguage ||
+              window.navigator.browserLanguage
+            Object.assign(this.platform, platform)
+          }
+        },
+        created() {
+          this.getIpInfo()
+          this.getPlatformInfo()
+        }
+      });
+    </script>
+  </body>
+</html>
+
