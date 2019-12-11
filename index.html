@@ -11,6 +11,55 @@
       td { white-space: pre; }
     </style>
     <title>What's My IP Address</title>
+    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6" defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js" defer></script>
+    <script src="https://unpkg.com/axios/dist/axios.min.js" defer></script>
+    <script src="https://unpkg.com/vue" defer></script>
+    <script type="module">
+      const vue = new Vue({
+        el: '#container',
+        data() {
+          return {
+            ipinfo_token: '7b9f9fe600b38e',
+            ipinfo: {},
+            platform: {}
+          }
+        },
+        methods: {
+          getIpInfo()  {
+            axios.get('https://ipinfo.io', {params: {token: this.ipinfo_token}}).then((res) => {
+              this.ipinfo = res.data
+            })
+          },
+          getGoogleMap() {
+            return `https://maps.google.co.jp/maps?output=embed&q=${this.ipinfo.loc}`
+          },
+          getPlatformInfo() {
+            const parser = new UAParser().getResult()
+            const platform = {
+              time: new Date().toLocaleString(),
+              referrer: document.referrer,
+              cookie:document.cookie.replace(/;/g, "\n"),
+              windowSize: `${window.innerWidth} x ${window.innerHeight}`,
+              screenSize: `${screen.width} x ${screen.height}`,
+              os: `${parser.os.name} ${parser.os.version}`,
+              ua: parser.ua,
+              browser: `${parser.browser.name} ${parser.browser.version}`,
+              device: `${parser.device.vendor||''} ${parser.device.model||''}`
+            };
+            platform.language = (window.navigator.languages && window.navigator.languages[0]) ||
+              window.navigator.language ||
+              window.navigator.userLanguage ||
+              window.navigator.browserLanguage
+            Object.assign(this.platform, platform)
+          }
+        },
+        created() {
+          this.getIpInfo()
+          this.getPlatformInfo()
+        }
+      });
+    </script>
   </head>
   <body>
     <div id='container'>
@@ -101,55 +150,6 @@
       <iframe :src="getGoogleMap()" width="600" height="480" frameborder="0" style="border:0;"></iframe>
     </div>
 
-    <script src="https://polyfill.io/v3/polyfill.min.js?features=es6"></script>
-    <script src="https://cdn.jsdelivr.net/npm/ua-parser-js@0/dist/ua-parser.min.js"></script>
-    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
-    <script src="https://unpkg.com/vue"></script>
-    <script type="module">
-      const vue = new Vue({
-        el: '#container',
-        data() {
-          return {
-            ipinfo_token: '7b9f9fe600b38e',
-            ipinfo: {},
-            platform: {}
-          }
-        },
-        methods: {
-          getIpInfo()  {
-            axios.get('https://ipinfo.io', {params: {token: this.ipinfo_token}}).then((res) => {
-              this.ipinfo = res.data
-            })
-          },
-          getGoogleMap() {
-            return `https://maps.google.co.jp/maps?output=embed&q=${this.ipinfo.loc}`
-          },
-          getPlatformInfo() {
-            const parser = new UAParser().getResult()
-            const platform = {
-              time: new Date().toLocaleString(),
-              referrer: document.referrer,
-              cookie:document.cookie.replace(/;/g, "\n"),
-              windowSize: `${window.innerWidth} x ${window.innerHeight}`,
-              screenSize: `${screen.width} x ${screen.height}`,
-              os: `${parser.os.name} ${parser.os.version}`,
-              ua: parser.ua,
-              browser: `${parser.browser.name} ${parser.browser.version}`,
-              device: `${parser.device.vendor||''} ${parser.device.model||''}`
-            };
-            platform.language = (window.navigator.languages && window.navigator.languages[0]) ||
-              window.navigator.language ||
-              window.navigator.userLanguage ||
-              window.navigator.browserLanguage
-            Object.assign(this.platform, platform)
-          }
-        },
-        created() {
-          this.getIpInfo()
-          this.getPlatformInfo()
-        }
-      });
-    </script>
   </body>
 </html>
 
